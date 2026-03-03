@@ -109,22 +109,73 @@ model DepositValue {
 }
 
 model User {
-  userId  String @id @default(uuid()) @db.Uuid
-  name    String
-  balance Int
+  id            String    @id @default(uuid()) @db.Uuid
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  organization   Organization @relation(fields: [organizationId], references: [organizationId])
-  organizationId String       @db.Uuid
+  // Application fields
+  balance        Int       @default(0)
+  organizationId String?   @db.Uuid
+  organization   Organization? @relation(fields: [organizationId], references: [organizationId])
+
+  sessions Session[]
+  accounts Account[]
 
   invoices Invoice[]
   topUps   TopUp[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String   @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String    @db.Uuid
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?   @db.Text
+  refreshToken          String?   @db.Text
+  idToken               String?   @db.Text
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String    @db.Text
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@unique([identifier, value])
 }
 
 model Invoice {
   invoiceId String   @id @default(uuid()) @db.Uuid
   timestamp DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [userId])
+  user   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
 
   positions InvoiceItem[]
@@ -148,6 +199,6 @@ model TopUp {
   amount    Int
   timestamp DateTime @default(now())
 
-  user   User   @relation(fields: [userId], references: [userId])
+  user   User   @relation(fields: [userId], references: [id])
   userId String @db.Uuid
 }
