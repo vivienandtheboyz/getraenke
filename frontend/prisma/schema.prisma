@@ -117,7 +117,7 @@ model User {
   organizationId String       @db.Uuid
 
   invoices Invoice[]
-  topups   TopUp[]
+  topUps   TopUp[]
 }
 
 model Invoice {
