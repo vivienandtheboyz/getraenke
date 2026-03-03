@@ -17,7 +17,7 @@ model Allergen {
   symbol String @id
   name   String
 
-  product Product[]
+  products Product[]
 }
 
 model Organization {
@@ -69,7 +69,7 @@ model Product {
   carbohydrate Int?
   // sugar in g
   sugar        Int?
-  // salt in g
+  // sodium in g
   sodium       Int?
 
   vegan      Boolean
@@ -79,8 +79,8 @@ model Product {
 
   allergens Allergen[]
 
-  price        ProductPrice[]
-  deposit      DepositValue[]
+  prices       ProductPrice[]
+  deposits     DepositValue[]
   invoiceItems InvoiceItem[]
 }
 
@@ -117,7 +117,7 @@ model User {
   organizationId String       @db.Uuid
 
   invoices Invoice[]
-  topup    TopUp[]
+  topups   TopUp[]
 }
 
 model Invoice {
