@@ -10,8 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@better-auth/prisma-adapter": "^1.5.2",
     "@prisma/adapter-pg": "^7.4.2",
     "@prisma/client": "^7.4.2",
+    "better-auth": "^1.5.2",
     "dotenv": "^17.3.1",
     "nuxt": "^4.3.1",
     "pg": "^8.19.0",
