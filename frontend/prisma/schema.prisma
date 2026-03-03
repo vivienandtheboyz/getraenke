@@ -69,7 +69,7 @@ model Product {
   carbohydrate Int?
   // sugar in g
   sugar        Int?
-  // sodium in g
+  // sodium in mg
   sodium       Int?
 
   vegan      Boolean
