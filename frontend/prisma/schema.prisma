@@ -13,50 +13,141 @@ datasource db {
   provider = "postgresql"
 }
 
+model Allergen {
+  symbol String @id
+  name   String
 
-model Getraenk {
-  getrId       Int                      @id @default(autoincrement())
-  quantity     Int                      // Quantity im Inventar
-  name         String
-  bild         String?                  // optional
-  preisHistorie GetraenkePreisHistorie[]
-  buchungen    Buchung[]
+  products Product[]
 }
 
-model GetraenkePreisHistorie {
-  getrId   Int
-  preis    Int
-  anfang   DateTime
-  ende     DateTime?
-  getraenk Getraenk  @relation(fields: [getrId], references: [getrId])
+model Organization {
+  organizationId String  @id @default(uuid()) @db.Uuid
+  name           String
+  logo           String?
+  logoDark       String?
+  banner         String?
 
-  @@id([getrId, anfang]) // Composite primary key
+  catalogues Catalogue[]
+  users      User[]
+}
+
+model Catalogue {
+  catalogueId String  @id @default(uuid()) @db.Uuid
+  name        String
+  logo        String?
+  logoDark    String?
+  banner      String?
+
+  organization   Organization @relation(fields: [organizationId], references: [organizationId])
+  organizationId String       @db.Uuid
+  products       Product[]
+}
+
+model Product {
+  productId String @id @default(uuid()) @db.Uuid
+
+  catalogue   Catalogue @relation(fields: [catalogueId], references: [catalogueId])
+  catalogueId String    @db.Uuid
+
+  size Int
+  unit String
+
+  inventory Int
+  name      String
+  image     String?
+  gtin      String?
+
+  // energy in kJ
+  energy       Int?
+  // protein in g
+  protein      Int?
+  // fat total in g
+  fatTotal     Int?
+  // fat saturated in g
+  fatSaturated Int?
+  // carbohydrate in g
+  carbohydrate Int?
+  // sugar in g
+  sugar        Int?
+  // sodium in mg
+  sodium       Int?
+
+  vegan      Boolean
+  vegetarian Boolean
+  halal      Boolean
+  kosher     Boolean
+
+  allergens Allergen[]
+
+  prices       ProductPrice[]
+  deposits     DepositValue[]
+  invoiceItems InvoiceItem[]
+}
+
+model ProductPrice {
+  price Int
+  start DateTime
+  end   DateTime?
+
+  product   Product @relation(fields: [productId], references: [productId])
+  productId String  @db.Uuid
+
+  @@id([productId, start])
+}
+
+// If § 31 (1) VerpackG should ever change 💹
+model DepositValue {
+  value Int
+  start DateTime
+  end   DateTime?
+
+  product   Product @relation(fields: [productId], references: [productId])
+  productId String  @db.Uuid
+
+  @@id([productId, start])
+  @@map("DepositHistory")
 }
 
 model User {
-  userId      Int         @id @default(autoincrement())
-  guthaben    Int
-  name        String
-  buchungen   Buchung[]
-  aufladungen Aufladung[]
+  userId  String @id @default(uuid()) @db.Uuid
+  name    String
+  balance Int
+
+  organization   Organization @relation(fields: [organizationId], references: [organizationId])
+  organizationId String       @db.Uuid
+
+  invoices Invoice[]
+  topUps   TopUp[]
 }
 
-model Buchung {
-  buchungId Int      @id @default(autoincrement())
-  userId    Int
-  getrId    Int
+model Invoice {
+  invoiceId String   @id @default(uuid()) @db.Uuid
   timestamp DateTime @default(now())
-  quantity  Int      @default(1)
-  
-  user      User     @relation(fields: [userId], references: [userId])
-  getraenk  Getraenk @relation(fields: [getrId], references: [getrId])
+
+  user   User   @relation(fields: [userId], references: [userId])
+  userId String @db.Uuid
+
+  positions InvoiceItem[]
 }
 
-model Aufladung {
-  aufladungId Int      @id @default(autoincrement())
-  userId      Int
-  amount      Int
-  timestamp   DateTime @default(now())
-  
-  user        User     @relation(fields: [userId], references: [userId])
+model InvoiceItem {
+  quantity Int @default(1)
+  discount Int
+
+  product   Product @relation(fields: [productId], references: [productId])
+  productId String  @db.Uuid
+
+  invoice   Invoice @relation(fields: [invoiceId], references: [invoiceId])
+  invoiceId String  @db.Uuid
+
+  @@id([productId, invoiceId])
+}
+
+model TopUp {
+  topUpId   String   @id @default(uuid()) @db.Uuid
+  amount    Int
+  timestamp DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [userId])
+  userId String @db.Uuid
 }
