@@ -10,8 +10,16 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.4.2",
+    "@prisma/client": "^7.4.2",
+    "dotenv": "^17.3.1",
     "nuxt": "^4.3.1",
+    "pg": "^8.19.0",
     "vue": "^3.5.29",
     "vue-router": "^5.0.3"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.18.0",
+    "prisma": "^7.4.2"
   }
 }

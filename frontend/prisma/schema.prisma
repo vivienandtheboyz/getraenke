@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+model Getraenk {
+  getrId       Int                      @id @default(autoincrement())
+  quantity     Int                      // Quantity im Inventar
+  name         String
+  bild         String?                  // optional
+  preisHistorie GetraenkePreisHistorie[]
+  buchungen    Buchung[]
+}
+
+model GetraenkePreisHistorie {
+  getrId   Int
+  preis    Int
+  anfang   DateTime
+  ende     DateTime?
+  getraenk Getraenk  @relation(fields: [getrId], references: [getrId])
+
+  @@id([getrId, anfang]) // Composite primary key
+}
+
+model User {
+  userId      Int         @id @default(autoincrement())
+  guthaben    Int
+  name        String
+  buchungen   Buchung[]
+  aufladungen Aufladung[]
+}
+
+model Buchung {
+  buchungId Int      @id @default(autoincrement())
+  userId    Int
+  getrId    Int
+  timestamp DateTime @default(now())
+  quantity  Int      @default(1)
+  
+  user      User     @relation(fields: [userId], references: [userId])
+  getraenk  Getraenk @relation(fields: [getrId], references: [getrId])
+}
+
+model Aufladung {
+  aufladungId Int      @id @default(autoincrement())
+  userId      Int
+  amount      Int
+  timestamp   DateTime @default(now())
+  
+  user        User     @relation(fields: [userId], references: [userId])
+}
